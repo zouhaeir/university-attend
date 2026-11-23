@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In | University Attendance Management System</title>
+  <title>Sign In or Sign Up | University Attendance Management System</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/responsive.css" />
 </head>
@@ -14,15 +14,115 @@
         <div class="brand-emblem" aria-hidden="true">UAMS</div>
         <h1 id="auth-heading" class="auth-title">University Attendance Portal</h1>
         <p class="auth-subtitle">
-          Sign in with Google. Faculty and admins access their dashboards; students can register their details and view attendance.
+          Sign in with Google or register with an email and password to access your portal.
         </p>
       </div>
 
-      <!-- Status / Access-Denied Alert Container -->
+      <!-- Status / Error / Access-Denied Alert Container -->
       <div id="auth-alert" class="alert alert-danger hidden" role="alert"></div>
 
+      <!-- Mode Switcher: Sign In vs. Email Sign Up -->
+      <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+        <button id="tab-signin" type="button" class="auth-tab active" role="tab" aria-selected="true">
+          Sign In
+        </button>
+        <button id="tab-signup" type="button" class="auth-tab" role="tab" aria-selected="false">
+          Sign Up with Email
+        </button>
+      </div>
+
+      <!-- Email & Password Sign-In Form -->
+      <form id="email-signin-form" class="auth-form">
+        <div class="form-group">
+          <label for="signin-email" class="form-label">Email Address</label>
+          <input
+            type="email"
+            id="signin-email"
+            class="form-input"
+            placeholder="you@university.edu"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signin-password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="signin-password"
+            class="form-input"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button id="email-signin-btn" type="submit" class="btn btn-primary btn-lg btn-block">
+          <span id="email-signin-label">Sign In with Email</span>
+        </button>
+      </form>
+
+      <!-- Email & Password Sign-Up Form -->
+      <form id="email-signup-form" class="auth-form hidden">
+        <div class="form-group">
+          <label for="signup-name" class="form-label">Full Name</label>
+          <input
+            type="text"
+            id="signup-name"
+            class="form-input"
+            placeholder="Enter your full name"
+            autocomplete="name"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-email" class="form-label">Email Address</label>
+          <input
+            type="email"
+            id="signup-email"
+            class="form-input"
+            placeholder="you@university.edu"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-password" class="form-label">Password (min. 6 characters)</label>
+          <input
+            type="password"
+            id="signup-password"
+            class="form-input"
+            placeholder="Create a password (6+ chars)"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+          <input
+            type="password"
+            id="signup-confirm-password"
+            class="form-input"
+            placeholder="Re-enter your password"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <button id="email-signup-btn" type="submit" class="btn btn-primary btn-lg btn-block">
+          <span id="email-signup-label">Create Account with Email</span>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>OR</span></div>
+
       <div class="auth-actions">
-        <button id="google-signin-btn" type="button" class="btn btn-primary btn-lg btn-block">
+        <button id="google-signin-btn" type="button" class="btn btn-outline btn-lg btn-block">
           <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
             <path fill="currentColor" d="M21.35 11.1h-9.18v2.98h5.27c-.23 1.24-.92 2.29-1.96 2.99v2.48h3.17c1.86-1.71 2.93-4.23 2.93-7.21 0-.42-.04-.83-.13-1.24z"/>
             <path fill="currentColor" d="M12.17 21.5c2.65 0 4.88-.88 6.5-2.38l-3.17-2.48c-.88.59-2.01.94-3.33.94-2.56 0-4.73-1.73-5.51-4.05H3.39v2.55c1.61 3.2 4.92 5.42 8.78 5.42z"/>
@@ -35,7 +135,7 @@
 
       <footer class="auth-footer">
         <p class="text-muted text-sm">
-          New students: sign in with your Google account to complete your university registration profile.
+          Registered faculty and admins route to their dashboards; new email/Google sign-ups enter the Student Portal to complete student details.
         </p>
       </footer>
     </section>

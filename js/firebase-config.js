@@ -9,13 +9,12 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase
 
 // Replace placeholder values with your Firebase Web App configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBBqbvHWs1UxkrInclRaJGXNuxfHneusYw",
-  authDomain: "university-attendance-279da.firebaseapp.com",
-  projectId: "university-attendance-279da",
-  storageBucket: "university-attendance-279da.firebasestorage.app",
-  messagingSenderId: "690954611530",
-  appId: "1:690954611530:web:caca11d35fd0ba50c8afb3",
-  measurementId: "G-82Q5MRN88T"
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 /**

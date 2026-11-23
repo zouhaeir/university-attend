@@ -1,12 +1,15 @@
 /**
  * Phase 3 — Authentication & Multi-Role Session Guard Module
- * Routes:
- *  - Active Admin   -> admin.html
- *  - Active Teacher -> teacher.html
- *  - Any other authenticated Google user -> student.html (self-service registration & attendance view)
+ * Supports:
+ *  - Email & Password Sign-Up & Sign-In
+ *  - Google Sign-In Popup
+ *  - Role routing: Admin -> admin.html, Teacher -> teacher.html, Other users -> student.html
  */
 import {
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
@@ -39,7 +42,58 @@ function redirectByRole(role) {
 }
 
 /**
- * Initiates Google Sign-In popup and routes user based on staff vs. student role.
+ * Resolves whether a signed-in Firebase user is an active Admin/Teacher or should enter student.html.
+ */
+async function routeAuthenticatedUser(user) {
+  let staffProfile = null;
+  try {
+    staffProfile = await resolveAndBindStaffProfile(user.uid, user.email);
+  } catch (lookupErr) {
+    console.warn("Staff profile lookup skipped; routing to student portal:", lookupErr);
+  }
+
+  if (staffProfile) {
+    if (staffProfile.active !== true) {
+      await signOut(auth);
+      showAuthAlert(
+        "Access Denied: Your institutional staff account has been deactivated. Contact your administrator."
+      );
+      return;
+    }
+    redirectByRole(staffProfile.role);
+    return;
+  }
+
+  redirectByRole("student");
+}
+
+function formatAuthError(error) {
+  switch (error?.code) {
+    case "auth/email-already-in-use":
+      return "An account with this email already exists. Switch to the Sign In tab instead.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Password must be at least 6 characters long.";
+    case "auth/invalid-credential":
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+      return "Invalid email or password.";
+    case "auth/popup-closed-by-user":
+      return "Sign-in popup was closed before completing authentication.";
+    case "auth/popup-blocked":
+      return "Your browser blocked the Google sign-in popup. Allow popups or use Email Sign In / Sign Up.";
+    case "auth/unauthorized-domain":
+      return "This domain is not authorized in Firebase Authentication. Add it under Authentication > Settings > Authorized domains.";
+    case "auth/operation-not-allowed":
+      return "Email/Password sign-in is not enabled yet in Firebase Console > Authentication > Sign-in method.";
+    default:
+      return error?.message || "Authentication failed.";
+  }
+}
+
+/**
+ * Initiates Google Sign-In popup and routes user based on role.
  */
 export async function loginWithGoogle() {
   if (!isFirebaseConfigured()) {
@@ -56,42 +110,74 @@ export async function loginWithGoogle() {
 
   try {
     const credential = await signInWithPopup(auth, googleProvider);
-    const user = credential.user;
-
-    // 1. Check if the Google account belongs to a registered Admin or Teacher
-    let staffProfile = null;
-    try {
-      staffProfile = await resolveAndBindStaffProfile(user.uid, user.email);
-    } catch (lookupErr) {
-      console.warn("Staff profile check returned error; falling back to student portal:", lookupErr);
-    }
-
-    if (staffProfile) {
-      if (staffProfile.active !== true) {
-        await signOut(auth);
-        showAuthAlert(
-          "Access Denied: Your institutional staff account has been deactivated. Contact your administrator."
-        );
-        return;
-      }
-      redirectByRole(staffProfile.role);
-      return;
-    }
-
-    // 2. Otherwise allow any authenticated Google user into the Student Portal to register/view profile
-    redirectByRole("student");
+    await routeAuthenticatedUser(credential.user);
   } catch (error) {
     console.error("Google Sign-In error:", error);
-    if (error.code === "auth/popup-closed-by-user") {
-      showAuthAlert("Sign-in popup was closed before completing authentication.");
-    } else if (error.code === "auth/popup-blocked") {
-      showAuthAlert("Your browser blocked the Google sign-in popup. Please allow popups for this site and try again.");
-    } else {
-      showAuthAlert(`Authentication failed: ${error.message}`);
-    }
+    showAuthAlert(formatAuthError(error));
   } finally {
     if (signInBtn) signInBtn.disabled = false;
     if (signInLabel) signInLabel.textContent = "Continue with Google";
+  }
+}
+
+/**
+ * Signs in an existing user with email and password.
+ */
+export async function loginWithEmail(email, password) {
+  if (!isFirebaseConfigured()) {
+    showAuthAlert("Firebase is not configured yet. Update js/firebase-config.js with your project keys.");
+    return;
+  }
+
+  const btn = document.getElementById("email-signin-btn");
+  const label = document.getElementById("email-signin-label");
+  hideAuthAlert();
+
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = "Signing in...";
+
+  try {
+    const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+    await routeAuthenticatedUser(credential.user);
+  } catch (error) {
+    console.error("Email sign-in error:", error);
+    showAuthAlert(formatAuthError(error));
+  } finally {
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = "Sign In with Email";
+  }
+}
+
+/**
+ * Registers a new user with full name, email, and password, then routes to student.html
+ * (or staff dashboard if pre-registered by an admin).
+ */
+export async function signUpWithEmail(fullName, email, password) {
+  if (!isFirebaseConfigured()) {
+    showAuthAlert("Firebase is not configured yet. Update js/firebase-config.js with your project keys.");
+    return;
+  }
+
+  const btn = document.getElementById("email-signup-btn");
+  const label = document.getElementById("email-signup-label");
+  hideAuthAlert();
+
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = "Creating account...";
+
+  try {
+    const cleanName = String(fullName || "").trim();
+    const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+    if (cleanName) {
+      await updateProfile(credential.user, { displayName: cleanName });
+    }
+    await routeAuthenticatedUser(credential.user);
+  } catch (error) {
+    console.error("Email sign-up error:", error);
+    showAuthAlert(formatAuthError(error));
+  } finally {
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = "Create Account with Email";
   }
 }
 
@@ -125,7 +211,6 @@ export function requireAuth(requiredRole = "any") {
           console.warn("Staff lookup skipped:", err);
         }
 
-        // Handle Staff accounts (admin / teacher)
         if (staffProfile) {
           if (staffProfile.active !== true) {
             await signOut(auth);
@@ -149,7 +234,6 @@ export function requireAuth(requiredRole = "any") {
           return;
         }
 
-        // Handle Student accounts (any authenticated Google user not in `teachers`)
         if (requiredRole !== "any" && requiredRole !== "student") {
           redirectByRole("student");
           resolve(null);
@@ -197,8 +281,55 @@ export async function logoutUser() {
   }
 }
 
+function setAuthTab(mode) {
+  const signInTab = document.getElementById("tab-signin");
+  const signUpTab = document.getElementById("tab-signup");
+  const signInForm = document.getElementById("email-signin-form");
+  const signUpForm = document.getElementById("email-signup-form");
+  hideAuthAlert();
+
+  const isSignUp = mode === "signup";
+  signInTab?.classList.toggle("active", !isSignUp);
+  signUpTab?.classList.toggle("active", isSignUp);
+  signInTab?.setAttribute("aria-selected", String(!isSignUp));
+  signUpTab?.setAttribute("aria-selected", String(isSignUp));
+
+  signInForm?.classList.toggle("hidden", isSignUp);
+  signUpForm?.classList.toggle("hidden", !isSignUp);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const signInBtn = document.getElementById("google-signin-btn");
+  const signInForm = document.getElementById("email-signin-form");
+  const signUpForm = document.getElementById("email-signup-form");
+  const tabSignIn = document.getElementById("tab-signin");
+  const tabSignUp = document.getElementById("tab-signup");
+
+  tabSignIn?.addEventListener("click", () => setAuthTab("signin"));
+  tabSignUp?.addEventListener("click", () => setAuthTab("signup"));
+
+  signInForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("signin-email")?.value || "";
+    const password = document.getElementById("signin-password")?.value || "";
+    await loginWithEmail(email, password);
+  });
+
+  signUpForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fullName = document.getElementById("signup-name")?.value || "";
+    const email = document.getElementById("signup-email")?.value || "";
+    const password = document.getElementById("signup-password")?.value || "";
+    const confirmPassword = document.getElementById("signup-confirm-password")?.value || "";
+
+    if (password !== confirmPassword) {
+      showAuthAlert("Passwords do not match. Please re-enter both password fields.");
+      return;
+    }
+
+    await signUpWithEmail(fullName, email, password);
+  });
+
   if (signInBtn) {
     signInBtn.addEventListener("click", loginWithGoogle);
 
