@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal | University Attendance System</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside id="app-sidebar" class="sidebar" aria-label="Student Navigation">
+      <div class="sidebar-header">
+        <span class="brand-badge">UAMS</span>
+        <span class="brand-name">Student Portal</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#student-profile-section" class="nav-link active">
+          <span>My Registration</span>
+        </a>
+        <a href="#student-attendance-section" class="nav-link">
+          <span>My Attendance</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <strong id="sidebar-student-name">Student</strong>
+          <span id="sidebar-student-id" class="text-xs text-muted">Complete Profile</span>
+        </div>
+        <button id="logout-btn" type="button" class="btn btn-outline btn-sm btn-block">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" type="button" class="btn btn-ghost mobile-menu-btn" aria-label="Toggle navigation">
+            &#9776;
+          </button>
+          <div>
+            <h1 class="page-title">Student Portal</h1>
+            <p class="text-xs text-muted" id="student-google-email">—</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span id="student-reg-badge" class="badge badge-warning">Registration Incomplete</span>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Onboarding / Edit Profile Card -->
+        <section id="student-profile-section" class="card" aria-labelledby="student-form-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="student-form-heading" class="section-title">Student Information &amp; Course Assignment</h2>
+              <p class="text-xs text-muted" style="margin:0;">
+                Enter your university details below so your instructor can mark your daily attendance.
+              </p>
+            </div>
+          </div>
+
+          <form id="student-registration-form" class="student-form-grid">
+            <div class="form-group">
+              <label for="stu-id-input" class="form-label">University Student ID *</label>
+              <input
+                type="text"
+                id="stu-id-input"
+                class="form-input"
+                placeholder="e.g., 20261045"
+                required
+              />
+              <span class="text-xs text-muted">Locked once registered to preserve attendance history.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="stu-fullname-input" class="form-label">Full Name *</label>
+              <input
+                type="text"
+                id="stu-fullname-input"
+                class="form-input"
+                placeholder="Enter your full legal name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="stu-dept-input" class="form-label">Department *</label>
+              <input
+                type="text"
+                id="stu-dept-input"
+                class="form-input"
+                placeholder="e.g., Computer Science"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="stu-teacher-select" class="form-label">Assigned Instructor / Teacher *</label>
+              <select id="stu-teacher-select" class="form-select" required>
+                <option value="">Select your instructor...</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <button type="submit" id="save-student-profile-btn" class="btn btn-primary">
+                Save Student Information
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Student Attendance Summary KPIs -->
+        <section class="stats-grid" aria-label="My Attendance Summary">
+          <article class="card stat-card">
+            <span class="stat-label">Total Recorded Days</span>
+            <strong id="stu-stat-total" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-present">
+            <span class="stat-label">Present</span>
+            <strong id="stu-stat-present" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-absent">
+            <span class="stat-label">Absent</span>
+            <strong id="stu-stat-absent" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-excused">
+            <span class="stat-label">Excused</span>
+            <strong id="stu-stat-excused" class="stat-value">0</strong>
+          </article>
+        </section>
+
+        <!-- Personal Attendance Log -->
+        <section id="student-attendance-section" class="card" aria-labelledby="stu-history-heading">
+          <div class="card-header">
+            <h2 id="stu-history-heading" class="section-title">My Attendance Record</h2>
+            <span class="text-xs text-muted">Read-only log updated by your instructor</span>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Department</th>
+                  <th>Instructor</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody id="student-attendance-tbody">
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    Complete and save your student registration above to view your attendance records.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./js/student.js"></script>
+</body>
+</html>

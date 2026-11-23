@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | University Attendance System</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+  <!-- SheetJS (xlsx) for Excel Import & Export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside id="app-sidebar" class="sidebar" aria-label="Administrator Navigation">
+      <div class="sidebar-header">
+        <span class="brand-badge">UAMS</span>
+        <span class="brand-name">Admin Console</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#overview-section" class="nav-link active" data-admin-tab="overview">
+          <span>System Overview</span>
+        </a>
+        <a href="#records-section" class="nav-link" data-admin-tab="records">
+          <span>Attendance Logs</span>
+        </a>
+        <a href="#teachers-section" class="nav-link" data-admin-tab="teachers">
+          <span>Teachers Directory</span>
+        </a>
+        <a href="#students-section" class="nav-link" data-admin-tab="students">
+          <span>Students Directory</span>
+        </a>
+        <a href="#import-export-section" class="nav-link" data-admin-tab="import-export">
+          <span>Excel Import / Export</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <strong id="sidebar-admin-name">Administrator</strong>
+          <span class="text-xs text-muted">System Admin</span>
+        </div>
+        <button id="logout-btn" type="button" class="btn btn-outline btn-sm btn-block">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" type="button" class="btn btn-ghost mobile-menu-btn" aria-label="Toggle navigation">
+            &#9776;
+          </button>
+          <div>
+            <h1 class="page-title">Administrator Dashboard</h1>
+            <p class="text-xs text-muted">University-wide attendance oversight &amp; data management</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <label for="admin-date-selector" class="sr-only">Reporting Date</label>
+          <input type="date" id="admin-date-selector" class="form-input form-input-sm" />
+          <button id="admin-all-dates-btn" type="button" class="btn btn-outline btn-sm">All Dates</button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- System-Wide KPIs -->
+        <section id="overview-section" class="stats-grid stats-grid-6" aria-label="University Attendance Statistics">
+          <article class="card stat-card">
+            <span class="stat-label">Active Teachers</span>
+            <strong id="admin-stat-teachers" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Active Students</span>
+            <strong id="admin-stat-students" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-present">
+            <span class="stat-label">Present</span>
+            <strong id="admin-stat-present" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-absent">
+            <span class="stat-label">Absent</span>
+            <strong id="admin-stat-absent" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-excused">
+            <span class="stat-label">Excused</span>
+            <strong id="admin-stat-excused" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Completion</span>
+            <strong id="admin-stat-completion" class="stat-value">0%</strong>
+          </article>
+        </section>
+
+        <!-- Global Filters -->
+        <section class="card toolbar-card" aria-label="Global Filters">
+          <div class="filter-row">
+            <div class="form-group">
+              <label for="admin-filter-dept" class="form-label">Department</label>
+              <select id="admin-filter-dept" class="form-select">
+                <option value="all">All Departments</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="admin-filter-teacher" class="form-label">Teacher</label>
+              <select id="admin-filter-teacher" class="form-select">
+                <option value="all">All Teachers</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="admin-filter-status" class="form-label">Status</label>
+              <select id="admin-filter-status" class="form-select">
+                <option value="all">All Statuses</option>
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+                <option value="excused">Excused</option>
+              </select>
+            </div>
+            <div class="form-group flex-grow">
+              <label for="admin-search-input" class="form-label">Search Records</label>
+              <input type="search" id="admin-search-input" class="form-input" placeholder="Filter by teacher, student name, or ID..." />
+            </div>
+          </div>
+        </section>
+
+        <!-- Attendance Audit & Monitoring Table -->
+        <section id="records-section" class="card" aria-labelledby="admin-records-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="admin-records-heading" class="section-title">Attendance &amp; Modification Audit Log</h2>
+              <span id="admin-records-count" class="text-xs text-muted">0 records</span>
+            </div>
+            <div class="btn-group">
+              <button id="sort-date-btn" type="button" class="btn btn-outline btn-sm">Sort: Date &darr;</button>
+              <button id="admin-export-btn" type="button" class="btn btn-primary btn-sm">Export Filtered (.xlsx)</button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Department</th>
+                  <th>Assigned Teacher</th>
+                  <th>Status</th>
+                  <th>Updated At</th>
+                  <th>Updated By</th>
+                </tr>
+              </thead>
+              <tbody id="admin-records-tbody">
+                <tr>
+                  <td colspan="8" class="empty-state">Loading attendance logs...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Teachers Directory -->
+        <section id="teachers-section" class="card" aria-labelledby="admin-teachers-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="admin-teachers-heading" class="section-title">Teachers &amp; Staff Directory</h2>
+              <span id="admin-teachers-count" class="text-xs text-muted">0 teachers</span>
+            </div>
+            <button id="toggle-add-teacher-btn" type="button" class="btn btn-outline btn-sm">+ Add Staff Member</button>
+          </div>
+
+          <!-- Inline Single Teacher Creation Form -->
+          <form id="add-teacher-form" class="inline-form-panel hidden">
+            <div class="filter-row">
+              <div class="form-group">
+                <label for="new-teacher-id" class="form-label">Teacher ID</label>
+                <input type="text" id="new-teacher-id" class="form-input" placeholder="e.g., T-105" required />
+              </div>
+              <div class="form-group">
+                <label for="new-teacher-name" class="form-label">Full Name</label>
+                <input type="text" id="new-teacher-name" class="form-input" placeholder="Dr. Sara Ahmed" required />
+              </div>
+              <div class="form-group">
+                <label for="new-teacher-email" class="form-label">Google Email</label>
+                <input type="email" id="new-teacher-email" class="form-input" placeholder="sara@university.edu" required />
+              </div>
+              <div class="form-group">
+                <label for="new-teacher-dept" class="form-label">Department</label>
+                <input type="text" id="new-teacher-dept" class="form-input" placeholder="English Literature" required />
+              </div>
+              <div class="form-group">
+                <label for="new-teacher-role" class="form-label">Role</label>
+                <select id="new-teacher-role" class="form-select">
+                  <option value="teacher">Teacher</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save User</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Teacher ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Role</th>
+                  <th>Google UID Status</th>
+                  <th>Account</th>
+                </tr>
+              </thead>
+              <tbody id="admin-teachers-tbody">
+                <tr>
+                  <td colspan="7" class="empty-state">Loading teachers...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Students Directory -->
+        <section id="students-section" class="card" aria-labelledby="admin-students-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="admin-students-heading" class="section-title">Students Directory</h2>
+              <span id="admin-students-count" class="text-xs text-muted">0 students</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full Name</th>
+                  <th>Department</th>
+                  <th>Assigned Teacher ID</th>
+                  <th>Assigned Teacher</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-tbody">
+                <tr>
+                  <td colspan="6" class="empty-state">Loading students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Excel Import / Export Staging Card (Phase 8) -->
+        <section id="import-export-section" class="card" aria-labelledby="import-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="import-heading" class="section-title">Excel Bulk Data Import &amp; Report Export</h2>
+              <span class="text-xs text-muted">Validate spreadsheets before importing or generate multi-scope .xlsx reports</span>
+            </div>
+            <div class="btn-group">
+              <button id="download-teacher-template-btn" type="button" class="btn btn-outline btn-sm">Teachers Template</button>
+              <button id="download-student-template-btn" type="button" class="btn btn-outline btn-sm">Students Template</button>
+            </div>
+          </div>
+
+          <div class="import-export-grid">
+            <!-- Import Panel -->
+            <div class="sub-panel">
+              <h3 class="subsection-title">1. Import Teachers or Students (.xlsx / .xls)</h3>
+              <div class="filter-row">
+                <div class="form-group">
+                  <label for="excel-import-type" class="form-label">Dataset Type</label>
+                  <select id="excel-import-type" class="form-select">
+                    <option value="teachers">Teachers (Teacher ID, Teacher Name, Email, Department)</option>
+                    <option value="students">Students (Student ID, Student Name, Teacher ID, Department)</option>
+                  </select>
+                </div>
+                <div class="form-group flex-grow">
+                  <label for="excel-file-input" class="form-label">Select Excel File</label>
+                  <input type="file" id="excel-file-input" class="form-input" accept=".xlsx,.xls,.csv" />
+                </div>
+              </div>
+
+              <label class="checkbox-label">
+                <input type="checkbox" id="excel-overwrite-checkbox" />
+                <span>Overwrite existing records in Firestore if ID already exists</span>
+              </label>
+
+              <div id="excel-validation-errors" class="alert alert-danger hidden" role="alert"></div>
+
+              <div id="excel-preview-container" class="hidden">
+                <div class="preview-header">
+                  <strong id="excel-preview-summary" class="text-sm">0 valid rows ready</strong>
+                  <button id="confirm-excel-import-btn" type="button" class="btn btn-primary btn-sm">
+                    Confirm &amp; Import to Firestore
+                  </button>
+                </div>
+                <div class="table-container preview-table-wrap">
+                  <table class="data-table">
+                    <thead id="excel-preview-thead"></thead>
+                    <tbody id="excel-preview-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Specialized Report Export Panel -->
+            <div class="sub-panel">
+              <h3 class="subsection-title">2. Export Formatted Excel Reports</h3>
+              <div class="export-controls-grid">
+                <div class="export-box">
+                  <strong class="text-sm">Daily Attendance Report</strong>
+                  <p class="text-xs text-muted">Exports all attendance records for the selected reporting date in the top bar.</p>
+                  <button id="export-daily-btn" type="button" class="btn btn-outline btn-sm">Download Daily Report</button>
+                </div>
+
+                <div class="export-box">
+                  <strong class="text-sm">Attendance by Teacher</strong>
+                  <p class="text-xs text-muted">Uses the currently selected Teacher filter above.</p>
+                  <button id="export-teacher-btn" type="button" class="btn btn-outline btn-sm">Download Teacher Report</button>
+                </div>
+
+                <div class="export-box">
+                  <strong class="text-sm">Attendance by Department</strong>
+                  <p class="text-xs text-muted">Uses the currently selected Department filter above.</p>
+                  <button id="export-dept-btn" type="button" class="btn btn-outline btn-sm">Download Department Report</button>
+                </div>
+
+                <div class="export-box">
+                  <strong class="text-sm">Individual Student History</strong>
+                  <div class="inline-input-group">
+                    <input type="text" id="export-student-id-input" class="form-input form-input-sm" placeholder="Enter Student ID..." />
+                    <button id="export-student-btn" type="button" class="btn btn-outline btn-sm">Export</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./js/admin.js"></script>
+</body>
+</html>

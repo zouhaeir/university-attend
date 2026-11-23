@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | University Attendance Management System</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body class="auth-body">
+  <main class="auth-wrapper">
+    <section class="card auth-card" aria-labelledby="auth-heading">
+      <div class="auth-brand">
+        <div class="brand-emblem" aria-hidden="true">UAMS</div>
+        <h1 id="auth-heading" class="auth-title">University Attendance Portal</h1>
+        <p class="auth-subtitle">
+          Sign in with Google. Faculty and admins access their dashboards; students can register their details and view attendance.
+        </p>
+      </div>
+
+      <!-- Status / Access-Denied Alert Container -->
+      <div id="auth-alert" class="alert alert-danger hidden" role="alert"></div>
+
+      <div class="auth-actions">
+        <button id="google-signin-btn" type="button" class="btn btn-primary btn-lg btn-block">
+          <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="currentColor" d="M21.35 11.1h-9.18v2.98h5.27c-.23 1.24-.92 2.29-1.96 2.99v2.48h3.17c1.86-1.71 2.93-4.23 2.93-7.21 0-.42-.04-.83-.13-1.24z"/>
+            <path fill="currentColor" d="M12.17 21.5c2.65 0 4.88-.88 6.5-2.38l-3.17-2.48c-.88.59-2.01.94-3.33.94-2.56 0-4.73-1.73-5.51-4.05H3.39v2.55c1.61 3.2 4.92 5.42 8.78 5.42z"/>
+            <path fill="currentColor" d="M6.66 13.53c-.2-.59-.31-1.22-.31-1.88s.11-1.29.31-1.88V7.22H3.39A9.82 9.82 0 0 0 2.35 11.65c0 1.58.38 3.08 1.04 4.43l3.27-2.55z"/>
+            <path fill="currentColor" d="M12.17 5.72c1.44 0 2.74.5 3.76 1.47l2.82-2.82C17.04 2.78 14.82 1.8 12.17 1.8 8.31 1.8 5 4.02 3.39 7.22l3.27 2.55c.78-2.32 2.95-4.05 5.51-4.05z"/>
+          </svg>
+          <span id="google-signin-label">Continue with Google</span>
+        </button>
+      </div>
+
+      <footer class="auth-footer">
+        <p class="text-muted text-sm">
+          New students: sign in with your Google account to complete your university registration profile.
+        </p>
+      </footer>
+    </section>
+  </main>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./js/auth.js"></script>
+</body>
+</html>

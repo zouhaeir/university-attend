@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Attendance | University Attendance System</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside id="app-sidebar" class="sidebar" aria-label="Primary Navigation">
+      <div class="sidebar-header">
+        <span class="brand-badge">UAMS</span>
+        <span class="brand-name">Faculty Portal</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="./teacher.html" class="nav-link">
+          <span>Dashboard</span>
+        </a>
+        <a href="./attendance.html" class="nav-link active" aria-current="page">
+          <span>Daily Attendance</span>
+        </a>
+        <a href="./history.html" class="nav-link">
+          <span>Attendance History</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <strong id="sidebar-user-name">Faculty Member</strong>
+          <span id="sidebar-user-dept" class="text-xs text-muted">Department</span>
+        </div>
+        <button id="logout-btn" type="button" class="btn btn-outline btn-sm btn-block">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" type="button" class="btn btn-ghost mobile-menu-btn" aria-label="Toggle navigation">
+            &#9776;
+          </button>
+          <div>
+            <h1 class="page-title">Daily Attendance Checklist</h1>
+            <p class="text-xs text-muted">Instructor: <span id="attendance-teacher-name">—</span></p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span id="save-status-indicator" class="badge badge-neutral">Ready</span>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Date & Live Summary Toolbar -->
+        <section class="card toolbar-card" aria-label="Attendance Controls">
+          <div class="toolbar-group">
+            <label for="attendance-date-picker" class="form-label">Attendance Date</label>
+            <input type="date" id="attendance-date-picker" class="form-input" />
+            <input
+              type="search"
+              id="attendance-search-input"
+              class="form-input"
+              placeholder="Filter student name or ID..."
+              aria-label="Filter students"
+            />
+          </div>
+
+          <div class="toolbar-stats">
+            <span class="badge badge-success">Present: <strong id="count-present">0</strong></span>
+            <span class="badge badge-danger">Absent: <strong id="count-absent">0</strong></span>
+            <span class="badge badge-warning">Excused: <strong id="count-excused">0</strong></span>
+            <span class="badge badge-neutral">Unmarked: <strong id="count-unmarked">0</strong></span>
+          </div>
+        </section>
+
+        <!-- Attendance Checklist Table -->
+        <section class="card" aria-labelledby="checklist-heading">
+          <div class="card-header">
+            <div>
+              <h2 id="checklist-heading" class="section-title">Student Roll Call</h2>
+              <span id="checklist-date-subtitle" class="text-xs text-muted">One attendance record per student per calendar day</span>
+            </div>
+            <button id="mark-all-present-btn" type="button" class="btn btn-outline btn-sm">
+              Mark All Present
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table checklist-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th class="text-center">Present</th>
+                  <th class="text-center">Absent</th>
+                  <th class="text-center">Excused</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-checklist-tbody">
+                <tr>
+                  <td colspan="5" class="empty-state">Loading assigned students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./js/attendance.js"></script>
+</body>
+</html>

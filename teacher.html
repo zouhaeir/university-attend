@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard | University Attendance System</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body class="dashboard-body">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside id="app-sidebar" class="sidebar" aria-label="Primary Navigation">
+      <div class="sidebar-header">
+        <span class="brand-badge">UAMS</span>
+        <span class="brand-name">Faculty Portal</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="./teacher.html" class="nav-link active" aria-current="page">
+          <span>Dashboard</span>
+        </a>
+        <a href="./attendance.html" class="nav-link">
+          <span>Daily Attendance</span>
+        </a>
+        <a href="./history.html" class="nav-link">
+          <span>Attendance History</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <strong id="sidebar-user-name">Faculty Member</strong>
+          <span id="sidebar-user-dept" class="text-xs text-muted">Department</span>
+        </div>
+        <button id="logout-btn" type="button" class="btn btn-outline btn-sm btn-block">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" type="button" class="btn btn-ghost mobile-menu-btn" aria-label="Toggle navigation">
+            &#9776;
+          </button>
+          <div>
+            <h1 class="page-title">Teacher Dashboard</h1>
+            <p id="current-date-label" class="text-xs text-muted"></p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="./attendance.html" class="btn btn-primary btn-sm">Take Today's Attendance</a>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Faculty Profile Banner -->
+        <section class="card profile-card" aria-labelledby="profile-heading">
+          <div>
+            <span class="badge badge-info">Active Instructor</span>
+            <h2 id="profile-heading" class="section-title">
+              Welcome, <span id="teacher-name">Loading...</span>
+            </h2>
+            <p class="text-muted text-sm">
+              <span id="teacher-email">—</span> &bull; Department of <span id="teacher-department">—</span>
+              &bull; ID: <span id="teacher-employee-id">—</span>
+            </p>
+          </div>
+          <div class="quick-links-group">
+            <a href="./history.html" class="btn btn-outline btn-sm">View History</a>
+          </div>
+        </section>
+
+        <!-- Key Metrics Grid -->
+        <section class="stats-grid" aria-label="Today's Attendance Summary">
+          <article class="card stat-card">
+            <span class="stat-label">Assigned Students</span>
+            <strong id="stat-total-students" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-present">
+            <span class="stat-label">Present Today</span>
+            <strong id="stat-present-today" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-absent">
+            <span class="stat-label">Absent Today</span>
+            <strong id="stat-absent-today" class="stat-value">0</strong>
+          </article>
+          <article class="card stat-card stat-excused">
+            <span class="stat-label">Excused Today</span>
+            <strong id="stat-excused-today" class="stat-value">0</strong>
+          </article>
+        </section>
+
+        <!-- Assigned Students Roster Preview -->
+        <section class="card" aria-labelledby="roster-heading">
+          <div class="card-header">
+            <h2 id="roster-heading" class="section-title">Assigned Students &amp; Today's Status</h2>
+            <a href="./attendance.html" class="btn btn-outline btn-sm">Open Checklist</a>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full Name</th>
+                  <th>Department</th>
+                  <th>Today's Status</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-students-tbody">
+                <tr>
+                  <td colspan="4" class="empty-state">Loading assigned students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./js/teacher.js"></script>
+</body>
+</html>

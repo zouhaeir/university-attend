@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function staffPath(uid) {
+      return /databases/$(database)/documents/teachers/$(uid);
+    }
+
+    function hasActiveProfile() {
+      return isSignedIn()
+        && exists(staffPath(request.auth.uid))
+        && get(staffPath(request.auth.uid)).data.active == true;
+    }
+
+    function currentRole() {
+      return get(staffPath(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return hasActiveProfile() && currentRole() == 'admin';
+    }
+
+    function isTeacher() {
+      return hasActiveProfile() && currentRole() == 'teacher';
+    }
+
+    function isValidStatus(status) {
+      return status in ['present', 'absent', 'excused'];
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    // ------------------------------------------------------------------------
+    // 1. Teachers Collection
+    // ------------------------------------------------------------------------
+    match /teachers/{docId} {
+      allow read, write: if isAdmin();
+
+      // Any authenticated Google user can read active teacher records (needed for student registration dropdown & login lookup)
+      allow read: if isSignedIn() && (
+        resource.data.active == true ||
+        docId == request.auth.uid ||
+        resource.data.uid == request.auth.uid ||
+        (request.auth.token.email != null && resource.data.email == request.auth.token.email)
+      );
+
+      // First-login UID binding for pre-registered staff
+      allow create: if isSignedIn()
+        && docId == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.active == true
+        && request.resource.data.role in ['teacher', 'admin']
+        && request.auth.token.email != null
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if isSignedIn()
+        && resource.data.active == true
+        && request.auth.token.email != null
+        && resource.data.email == request.auth.token.email
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ------------------------------------------------------------------------
+    // 2. Students Collection (Supports both Admin-imported & Self-Registered Students)
+    // ------------------------------------------------------------------------
+    match /students/{studentId} {
+      allow read, write: if isAdmin();
+
+      // Teachers can read students assigned to them
+      allow read: if isTeacher() && (
+        resource.data.teacherUid == request.auth.uid ||
+        resource.data.teacherEmployeeId == get(staffPath(request.auth.uid)).data.employeeId
+      );
+
+      // Teachers can link their UID on first sign-in
+      allow update: if isTeacher()
+        && resource.data.teacherEmployeeId == get(staffPath(request.auth.uid)).data.employeeId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teacherUid'])
+        && request.resource.data.teacherUid == request.auth.uid;
+
+      // Students can read their own record
+      allow read: if isSignedIn() && (
+        resource.data.uid == request.auth.uid ||
+        (request.auth.token.email != null && resource.data.email == request.auth.token.email)
+      );
+
+      // Any authenticated Google user can self-register their student profile
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.studentId == studentId
+        && request.resource.data.active == true
+        && request.auth.token.email != null
+        && request.resource.data.email == request.auth.token.email;
+
+      // Students can update their own profile details (without hijacking another student's ID)
+      allow update: if isSignedIn()
+        && (resource.data.uid == request.auth.uid || resource.data.email == request.auth.token.email)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.studentId == studentId;
+    }
+
+    // ------------------------------------------------------------------------
+    // 3. Attendance Collection
+    // ------------------------------------------------------------------------
+    match /attendance/{recordId} {
+      allow read, write: if isAdmin();
+
+      // Teachers can read their own attendance records
+      allow read: if isTeacher() && resource.data.teacherUid == request.auth.uid;
+
+      // Students can read their own attendance records
+      allow read: if isSignedIn()
+        && exists(/databases/$(database)/documents/students/$(resource.data.studentId))
+        && get(/databases/$(database)/documents/students/$(resource.data.studentId)).data.uid == request.auth.uid;
+
+      // Teachers can create or update daily attendance for their assigned students
+      allow create, update: if isTeacher()
+        && request.resource.data.teacherUid == request.auth.uid
+        && request.resource.data.updatedBy == request.auth.uid
+        && isValidStatus(request.resource.data.status)
+        && isValidDateString(request.resource.data.date)
+        && recordId == (request.resource.data.date + '_' + request.resource.data.studentId)
+        && exists(/databases/$(database)/documents/students/$(request.resource.data.studentId))
+        && (
+          get(/databases/$(database)/documents/students/$(request.resource.data.studentId)).data.teacherUid == request.auth.uid ||
+          get(/databases/$(database)/documents/students/$(request.resource.data.studentId)).data.teacherEmployeeId == get(staffPath(request.auth.uid)).data.employeeId
+        );
+    }
+  }
+}

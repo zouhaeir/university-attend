@@ -1,0 +1,81 @@
+/* ==========================================================================
+   Responsive Breakpoints (Tablets & Mobile Devices)
+   ========================================================================== */
+
+@media (max-width: 1140px) {
+  .stats-grid-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .import-export-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.open {
+    display: block;
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    padding: 0 1rem;
+    height: auto;
+    min-height: var(--topbar-height);
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .stats-grid,
+  .stats-grid-6,
+  .export-controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .auth-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .toast-container {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}
