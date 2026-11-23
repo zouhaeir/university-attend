@@ -19,7 +19,8 @@ import {
   formatTimestamp,
   escapeHtml,
   renderStatusBadge,
-  showToast
+  showToast,
+  onDomReady
 } from "./utils.js";
 
 let currentSession = null;
@@ -583,7 +584,7 @@ function formatRecordsForExcel(records) {
    INITIALIZATION & EVENT BINDINGS
    ============================================================================ */
 
-document.addEventListener("DOMContentLoaded", async () => {
+onDomReady(async () => {
   initSidebarToggle();
 
   const dateSelector = document.getElementById("admin-date-selector");

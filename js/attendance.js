@@ -15,7 +15,8 @@ import {
   getLocalDateString,
   formatDisplayDate,
   escapeHtml,
-  showToast
+  showToast,
+  onDomReady
 } from "./utils.js";
 
 let currentSession = null;
@@ -235,7 +236,7 @@ async function handleMarkAllPresent() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+onDomReady(async () => {
   initSidebarToggle();
 
   const datePicker = document.getElementById("attendance-date-picker");

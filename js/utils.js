@@ -150,4 +150,20 @@ export function initSidebarToggle() {
   });
 
   backdrop.addEventListener("click", closeSidebar);
+  sidebar.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", closeSidebar);
+  });
+}
+
+/**
+ * Executes a callback immediately if the DOM is already parsed, or on DOMContentLoaded.
+ * Prevents missed initialization in deferred ES6 modules that import remote CDN SDKs.
+ * @param {() => void} callback
+ */
+export function onDomReady(callback) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", callback, { once: true });
+  } else {
+    callback();
+  }
 }

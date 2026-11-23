@@ -10,10 +10,11 @@ import {
   formatDisplayDate,
   escapeHtml,
   renderStatusBadge,
-  showToast
+  showToast,
+  onDomReady
 } from "./utils.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+onDomReady(async () => {
   initSidebarToggle();
 
   const todayStr = getLocalDateString();

@@ -15,7 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { auth, googleProvider, isFirebaseConfigured } from "./firebase-config.js";
 import { resolveAndBindStaffProfile, getStudentProfileByAuth } from "./db.js";
-import { showToast } from "./utils.js";
+import { showToast, onDomReady } from "./utils.js";
 
 function showAuthAlert(message) {
   const alertEl = document.getElementById("auth-alert");
@@ -240,7 +240,14 @@ export function requireAuth(requiredRole = "any") {
           return;
         }
 
-        const studentProfile = await getStudentProfileByAuth(user.uid, user.email);
+        let studentProfile = null;
+        try {
+          studentProfile = await getStudentProfileByAuth(user.uid, user.email);
+        } catch (stuErr) {
+          console.warn("Student profile lookup returned warning (check firestore.rules):", stuErr);
+          showToast("Firestore permissions warning: ensure updated firestore.rules are published.", "error", 5000);
+        }
+
         if (studentProfile && studentProfile.active === false) {
           await signOut(auth);
           window.location.replace("./index.html");
@@ -298,7 +305,7 @@ function setAuthTab(mode) {
   signUpForm?.classList.toggle("hidden", !isSignUp);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+onDomReady(() => {
   const signInBtn = document.getElementById("google-signin-btn");
   const signInForm = document.getElementById("email-signin-form");
   const signUpForm = document.getElementById("email-signup-form");

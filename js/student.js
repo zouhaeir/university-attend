@@ -15,7 +15,8 @@ import {
   formatTimestamp,
   escapeHtml,
   renderStatusBadge,
-  showToast
+  showToast,
+  onDomReady
 } from "./utils.js";
 
 let currentSession = null;
@@ -122,7 +123,7 @@ function applyProfileToUI(profile, user) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+onDomReady(async () => {
   initSidebarToggle();
 
   currentSession = await requireAuth("student");

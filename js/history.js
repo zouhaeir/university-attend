@@ -16,7 +16,8 @@ import {
   formatTimestamp,
   escapeHtml,
   renderStatusBadge,
-  showToast
+  showToast,
+  onDomReady
 } from "./utils.js";
 
 let currentSession = null;
@@ -143,7 +144,7 @@ async function handleStatusEdit(docId, newStatus) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+onDomReady(async () => {
   initSidebarToggle();
 
   const dateFilter = document.getElementById("history-date-filter");
